@@ -318,11 +318,18 @@ sampleClustering <- hclust(d)
 batch <- as.integer(factor(tss))
 sampleDendrogram <- as.dendrogram(sampleClustering, hang=-1, label_cols = manualcolors)
 names(batch) <- colnames(se.filt)
-outcome <- paste(substr(colnames(se.filt), 9, 12), as.character(se.filt$type), sep="-")
 outcome2 <- as.character(se.filt$type)
 outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
 outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
 names(outcome2) <- colnames(se.filt)
+colors <- palette()
+palette(c(colors,'black','forestgreen', 'red2', 'orange', 'cornflowerblue', 
+                'magenta', 'darkolivegreen4',  
+                'indianred1', 'tan4', 'darkblue', 
+                'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3',
+                "tan1",'darkgray', 'wheat4', '#DDAD4B', 'chartreuse', 'seagreen1',
+                'moccasin', 'mediumvioletred', 'seagreen','cadetblue1',
+                "darkolivegreen1" ,"tan2" ,   "tomato3"))
 sampleDendrogram <- dendrapply(sampleDendrogram,
                                function(x, batch, labels) {
                                  if (is.leaf(x)) {
@@ -340,22 +347,10 @@ It is difficult to see much in this plot, but in general, we notice that batches
 ```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
 outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
 outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
-batch <- as.factor(factor(tss))
-tss_col <- batch
-labels <- c('4P','BA','BB','C9','CN','CQ','CR','D6','CX','CV','DQ','F7','HD','HL','IQ','KU','MT','MZ','P3','QK','RS','T2','T3', 'TN','UF','UP','WA','H7')
-labels_col <- c('black','forestgreen', 'red2', 'orange', 'cornflowerblue', 
-                'magenta', 'darkolivegreen4',  
-                'indianred1', 'tan4', 'darkblue', 
-                'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3',
-                "tan1",'darkgray', 'wheat4', '#DDAD4B', 'chartreuse', 'seagreen1',
-                'moccasin', 'mediumvioletred', 'seagreen','cadetblue1',
-                "darkolivegreen1" ,"tan2" ,   "tomato3")
-library(car)
-tss_col<- recode(tss_col,"'4P'='black';'BA'='forestgreen';'BB'='red2';'C9'='orange';'CN'='cornflowerblue';'CQ'='magenta';'CR'='darkolivegreen4';'D6'='indianred1';'CX'='tan4';'CV'='darkblue';'DQ'='mediumorchid1';'F7'='firebrick4';'HD'='yellowgreen';'HL'='lightsalmon';'IQ'='tan3';'KU'='tan1';'MT'='darkgrey';'MZ'='wheat4';'P3'='#DDAD4B';'QK'='chartreuse';'RS'='seagreen1';'T2'='moccasin';'T3'='mediumvioletred';'TN'='seagreen';'UF'='cadetblue1';'UP'='darkolivegreen1';'WA'='tan2';'H7'='tomato3'") 
-
-plotMDS(dge.filt, label = outcome2, col=as.character(tss_col))
-legend("bottomleft", paste("Batch", labels), fill=labels_col, inset=0.05)
-
+batch <- as.integer(factor(tss))
+plotMDS(dge.filt, labels=outcome2, col=batch)
+legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(tss))),
+       fill=sort(unique(batch)), inset=0.05)
 ```
 
 ### Removal of samples with uneven distribution.
@@ -377,11 +372,10 @@ sampleClustering <- hclust(d)
 batch <- as.integer(factor(tss_filt))
 sampleDendrogram <- as.dendrogram(sampleClustering, hang=-1)
 names(batch) <- colnames(se_tss)
-outcome <- paste(substr(colnames(se_tss), 9, 12), as.character(se_tss$type), sep="-")
-outcome2 <- as.character(se_tss$type)
-outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
-outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
-names(outcome2) <- colnames(se_tss)
+outcome3 <- as.character(se_tss$type)
+outcome3 <- replace(outcome3, outcome3 == 'tumor', "T")
+outcome3 <- replace(outcome3, outcome3 == 'normal', "N")
+names(outcome3) <- colnames(se_tss)
 sampleDendrogram <- dendrapply(sampleDendrogram,
                                function(x, batch, labels) {
                                  if (is.leaf(x)) {
@@ -389,7 +383,7 @@ sampleDendrogram <- dendrapply(sampleDendrogram,
                                    attr(x, "label") <- as.vector(labels[attr(x, "label")])
                                  }
                                  x
-                               }, batch, outcome2)
+                               }, batch, outcome3)
 
 plot(sampleDendrogram, cex = 0.6 , main="Hierarchical clustering of samples")
 legend("topright", paste("Batch", sort(unique(batch)), levels(factor(tss_filt))), fill=unique(as.factor(batch)))
@@ -398,31 +392,10 @@ legend("topright", paste("Batch", sort(unique(batch)), levels(factor(tss_filt)))
 Batches are mixed and we observed N and T clustering. There are two clusters of N that could be due to othervariables.
 
 ```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
-outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
-outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
-batch <- factor(tss_filt)
-tss_col <- batch
-tss_col<- recode(tss_col,"'CV'='orange';'H7'='forestgreen';'HD'='red2'; 'WA'='black'") 
-labels <- c('CV','H7','HD','WA')
-labels_col <- c('black','forestgreen', 'red2', 'blue')
-plotMDS(dge_tss, label = outcome2, col=as.character(tss_col))
-legend("bottomleft", paste("Batch", labels),fill=labels_col, inset=0.05)
+plotMDS(dge_tss, label = outcome3, col=batch, main="Clustering by tss")
+legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(tss_filt))),
+       fill=sort(unique(batch)), inset=0.05)
 ```
-
-```{r}
-library(gplots)
-logCPM <- cpm(dge_tss, log=TRUE, prior.count=3)
-colnames(logCPM)<- outcome2
-sample.type <- tss_filt
-sample.type <- replace(sample.type, sample.type == "CV", 'black' )
-sample.type <- replace(sample.type, sample.type == "H7", 'red' )
-sample.type <- replace(sample.type, sample.type == "HD", 'green' )
-sample.type <- replace(sample.type, sample.type == "WA", 'blue' )
-heatmap.2(cor(logCPM, method = "spearman"), colCol = sample.type, trace = "none", colRow =  sample.type)
-```
-
-
-
 
 ### Checking other technical posible surrogate variables.
 
@@ -438,33 +411,15 @@ table(samplevial_filt)
 Since PCA seem to be more readable, we only plot PCA:
 
 ```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
-outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
-outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
-batch <- as.factor(factor(plate_filt))
-plate_col <- batch
-labels <- c('1514', '1686', '1915', '2016', '2081', '2132', '2187', '2232', '2403', 'A24H', 'A24Z', 'A266', 'A28V', 'A30B', 'A31N', 'A34R','A466')
-labels_col <- c('black','forestgreen', 'red2', 'orange', 'cornflowerblue', 'magenta','darkolivegreen4','indianred1', 'tan4', 'darkblue', 'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3', "tan1",'darkgray')
-
-library(car)
-plate_col<- recode(plate_col,"'1514'='black';'1686'='forestgreen';'1915'='red2';'2016'='orange';'2081'='cornflowerblue';'2132'='magenta';'2187'='darkolivegreen4';'2232'='indianred1';'2403'='tan4';'A24H'='darkblue';'A24Z'='mediumorchid1';'A266'='firebrick4';'A28V'='yellowgreen';'A30B'='lightsalmon';'A31N'='tan3';'A34R'='tan1';'A466'='darkgrey'") 
-
-plotMDS(dge_tss, label = outcome2, col=as.character(plate_col), main = "plate")
-legend("bottomleft", paste("Batch", labels), fill=labels_col, inset=0.05)
-
+batch <- as.integer(factor(plate_filt))
+plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by plate")
+legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(plate_filt))),
+       fill=sort(unique(batch)), inset=0.05)
 ```
 
 ```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
-outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
-outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
 batch <- as.integer(factor(portionanalyte_filt))
-manualcolors<-c('black','forestgreen', 'red2', 'orange', 'cornflowerblue', 
-                'magenta', 'darkolivegreen4',  
-                'indianred1', 'tan4', 'darkblue', 
-                'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3',
-                "tan1",'darkgray', 'wheat4', '#DDAD4B', 'chartreuse', 'seagreen1',
-                'moccasin', 'mediumvioletred', 'seagreen','cadetblue1',
-                "darkolivegreen1" ,"tan2" ,   "tomato3" ) # , "#7CE3D8","gainsboro"
-plotMDS(dge_tss, label = outcome2, col=batch, main = "portionanalyte")
+plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by portionanalyte")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(portionanalyte_filt))),
        fill=sort(unique(batch)), inset=0.05)
 ```
@@ -473,17 +428,9 @@ legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(portionan
 
 
 ```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
-outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
-outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
+
 batch <- as.integer(factor(samplevial_filt))
-manualcolors<-c('black','forestgreen', 'red2', 'orange', 'cornflowerblue', 
-                'magenta', 'darkolivegreen4',  
-                'indianred1', 'tan4', 'darkblue', 
-                'mediumorchid1','firebrick4',  'yellowgreen', 'lightsalmon', 'tan3',
-                "tan1",'darkgray', 'wheat4', '#DDAD4B', 'chartreuse', 'seagreen1',
-                'moccasin', 'mediumvioletred', 'seagreen','cadetblue1',
-                "darkolivegreen1" ,"tan2" ,   "tomato3" ) # , "#7CE3D8","gainsboro"
-plotMDS(dge_tss, label = outcome2, col=batch, main = "samplevial")
+plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by samplevial")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(samplevial_filt))),
        fill=sort(unique(batch)), inset=0.05)
 ```
