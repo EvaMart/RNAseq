@@ -122,18 +122,18 @@ names(sampledepth) <- substr(colnames(se), 6, 12)
 sort(sampledepth)
 ```
 
+
+```{r}
+dge <- dge[,(dge$samples$lib.size/1e6) > 40 ] # 50e06 threshold value
+se <- se[,rownames(dge$samples)]
+table(se$type)
+```
+
 ## Distribution of expression levels among samples
 
 Let's look at the distribution of expression values per sample in terms of
 logarithmic CPM units. Due to the large number of samples, we display tumor
 and normal samples separately, and are shown in Figure \@ref(fig:distRawExp)
-
-<!---
-the option echo=FALSE hides the R code. When plotting in general one does not
-want to see the code. Options fig.height and fig.width control height and width
-of the plot in inches while out.height and out.width do it in the final output
-file; see http://yihui.name/knitr/options for full details.
---->
 
 ```{r distRawExp, echo=FALSE, fig.height=4, fig.width=10, out.width="800px", fig.cap="Non-parametric density distribution of expression profiles per sample.", message=FALSE, eval=FALSE}
 library(geneplotter)
@@ -207,15 +207,7 @@ saveRDS(dge.filt, file.path("results", "dge.filt.rds"))
 We examine now the MA-plots of the normalized expression profiles. We look first to
 the tumor samples in Figure \@ref(fig:maPlotsTumor).
 
-<!---
-Here we make a MA-plot for each sample. The options 'fig.height' and 'fig.width'
-control the relative image size in *inches*. The final image size results from
-'height'x'dpi' and 'width'x'dpi', where 'dpi' is the image resolution in
-"dots per inch" (by default dpi=72). To scale the image to a desired size use
-'out.width' and 'out.height'. More information at http://yihui.name/knitr/options
---->
-
-```{r maPlotsTumor, fig.height=36, fig.width=6, dpi=100, echo=FALSE, fig.cap="MA-plots of the tumor samples.", eval=FALSE}
+```{r maPlotsTumor, fig.height=36, fig.width=6, dpi=100, echo=FALSE, fig.cap="MA-plots of the tumor samples."}
 par(mfrow=c(22, 3), mar=c(4, 5, 3, 1))
 setmp <- se.filt[, se.filt$type == "tumor"]
 dgetmp <- dge.filt[, se.filt$type == "tumor"]
@@ -273,26 +265,15 @@ table(samplevial)
 
 From this information we can make the following observations:
 
-  * All samples were sequenced at the same center
+  * 
 
-  * All samples belong to one of two combinations of tissue type and vial, matching the
-    expected tumor and normal distribution.
+  *
 
-  * Samples were collected across different tissue source sites (TSS).
+  *
 
-  * All samples were sequenced within the same plate, except for the following one:
+  * 
 
-```{r}
-colnames(se.filt)[plate == "2403"]
-```
-
-  * All samples were sequenced using one of two portion and analyte combinations except fo the
-    following one:
-
-```{r}
-colnames(se.filt)[portionanalyte == "21R"]
-```
-
+  * 
 We are going to use the TSS as surrogate of batch effect indicator. Considering our outcome
 of interest as molecular changes between sample types, tumor vs. normal, we will examine now
 the cross-classification of this outcome with TSS.
@@ -310,7 +291,7 @@ table(data.frame(TYPE=se.filt$type, VIAL=samplevial))
 
 #### TSS
 
-```{r sampleClustering, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S6: Hierarchical clustering of the samples."}
+```{r sampleClustering, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Hierarchical clustering of the samples."}
 
 logCPM <- cpm(dge.filt, log=TRUE, prior.count=3)
 d <- as.dist(1-cor(logCPM, method="spearman"))
@@ -344,7 +325,7 @@ legend("topright", paste("Batch", sort(unique(batch)), levels(factor(tss))), fil
 ```
 It is difficult to see much in this plot, but in general, we notice that batches seem mixed.
 
-```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
+```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Multidimensional scaling plot of the samples."}
 outcome2 <- replace(outcome2, outcome2 == 'tumor', "T")
 outcome2 <- replace(outcome2, outcome2 == 'normal', "N")
 batch <- as.integer(factor(tss))
@@ -364,7 +345,7 @@ table(data.frame(TYPE=se_tss$type, TSS=tss_filt))
 dge_tss <- dge.filt[,mask_tss]
 dim(dge_tss)
 ```
-```{r sampleClustering, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S6: Hierarchical clustering of the samples."}
+```{r sampleClustering2, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Hierarchical clustering of the samples after removing those from unbalanced tissue sites."}
 
 logCPM <- cpm(dge_tss, log=TRUE, prior.count=3)
 d <- as.dist(1-cor(logCPM, method="spearman"))
@@ -385,13 +366,13 @@ sampleDendrogram <- dendrapply(sampleDendrogram,
                                  x
                                }, batch, outcome3)
 
-plot(sampleDendrogram, cex = 0.6 , main="Hierarchical clustering of samples")
+plot(sampleDendrogram, cex = 0.6 , main="")
 legend("topright", paste("Batch", sort(unique(batch)), levels(factor(tss_filt))), fill=unique(as.factor(batch)))
 
 ```
 Batches are mixed and we observed N and T clustering. There are two clusters of N that could be due to othervariables.
 
-```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
+```{r mdsPlot2, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Multidimensional scaling plot of the samples after removing those from unbalanced tissue sites."}
 plotMDS(dge_tss, label = outcome3, col=batch, main="Clustering by tss")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(tss_filt))),
        fill=sort(unique(batch)), inset=0.05)
@@ -410,27 +391,25 @@ table(samplevial_filt)
 
 Since PCA seem to be more readable, we only plot PCA:
 
-```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
+```{r mdsPlot3, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Multidimensional scaling plot of the samples colored by plate."}
 batch <- as.integer(factor(plate_filt))
-plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by plate")
+plotMDS(dge_tss, label = outcome3, col=batch, main = "")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(plate_filt))),
        fill=sort(unique(batch)), inset=0.05)
 ```
 
-```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
+```{r mdsPlot4, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Multidimensional scaling plot of the samples colored by portionanalyte."}
 batch <- as.integer(factor(portionanalyte_filt))
-plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by portionanalyte")
+plotMDS(dge_tss, label = outcome3, col=batch, main = "")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(portionanalyte_filt))),
        fill=sort(unique(batch)), inset=0.05)
 ```
 
 
-
-
-```{r mdsPlot, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Figure S7: Multidimensional scaling plot of the samples."}
+```{r mdsPlot5, fig.height=7, fig.width=14, dpi=100, echo=TRUE, fig.cap="Multidimensional scaling plot of the samples colored by samplevial."}
 
 batch <- as.integer(factor(samplevial_filt))
-plotMDS(dge_tss, label = outcome3, col=batch, main = "Clustering by samplevial")
+plotMDS(dge_tss, label = outcome3, col=batch, main = "")
 legend("bottomleft", paste("Batch", sort(unique(batch)), levels(factor(samplevial_filt))),
        fill=sort(unique(batch)), inset=0.05)
 ```
